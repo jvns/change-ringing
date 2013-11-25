@@ -41,15 +41,17 @@
 
 (play-sequence metro (minor-notes :C4))
 
-(defn play-method [metro beat method notes]
-  (let
-      [hs-change (first method)
-       bs-change (second method)
-       hs-notes (permute notes hs-change)
-       bs-notes (permute hs-notes bs-change)]
-    (println "Hi!")
-    (play-sequence metro beat (concat hs-notes bs-notes))
-    (apply-at (metro (+ beat 13)) play-method metro (+ beat 13) (drop 2 method) bs-notes [])))
+(defn play-method
+  ([metro method notes] (play-method metro (metro) method notes))
+  ([metro beat method notes]
+      (let
+          [hs-change (first method)
+           bs-change (second method)
+           hs-notes (permute notes hs-change)
+           bs-notes (permute hs-notes bs-change)]
+        (println "Hi!")
+        (play-sequence metro beat (concat hs-notes bs-notes))
+        (apply-at (metro (+ beat 13)) play-method metro (+ beat 13) (drop 2 method) bs-notes []))))
 
-(play-method metro (metro) (take 14 plain-hunt) (minor-notes :C4))
+(play-method metro (take 14 plain-hunt) (minor-notes :C4))
 (stop)
