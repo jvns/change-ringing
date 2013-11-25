@@ -36,10 +36,16 @@
 (defmacro defmethod [name sequence]
   `(def ~name (concat [identity identity] ~sequence)))
 
-(defmethod plain-hunt (cycle [handstroke-hunt backstroke-hunt]))
+(defmethod plain-hunt
+  (->> [handstroke-hunt backstroke-hunt]
+       (cycle)
+       (take 12)))
 
-
-(play-sequence metro (minor-notes :C4))
+(defmethod plain-bob
+  (->> (concat (take 11 (cycle [handstroke-hunt backstroke-hunt]))
+               [seconds])
+       (cycle)
+       (take 60)))
 
 (defn play-method
   ([metro method notes] (play-method metro (metro) method notes))
@@ -49,7 +55,6 @@
            bs-change (second method)
            hs-notes (permute notes hs-change)
            bs-notes (permute hs-notes bs-change)]
-        (println "Hi!")
         ;; Play the notes
         (play-sequence metro beat (concat hs-notes bs-notes))
         ;; Repeat in 13 beats (with a handstroke gap)
@@ -58,4 +63,6 @@
          play-method metro (+ beat 13) (drop 2 method) bs-notes []))))
 
 (play-method metro (take 14 plain-hunt) (minor-notes :C4))
+(play-method metro plain-bob (minor-notes :C4))
+(play-method metro plain-hunt (minor-notes :C4))
 (stop)
