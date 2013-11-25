@@ -52,17 +52,16 @@
 (defn play-method
   ([metro method notes] (play-method metro (metro) method notes))
   ([metro beat method notes]
+     (when (> (count method) 0)
       (let
-          [hs-change (first method)
-           bs-change (second method)
-           hs-notes (permute notes hs-change)
-           bs-notes (permute notes bs-change)]
+          [hs-notes (permute notes (first method))
+           bs-notes (permute notes (second method))]
         ;; Play the notes
         (play-sequence metro beat (concat hs-notes bs-notes))
         ;; Repeat in 13 beats (with a handstroke gap)
         (apply-at
          (metro (+ beat 13))
-         play-method metro (+ beat 13) (drop 2 method) notes []))))
+         play-method metro (+ beat 13) (drop 2 method) notes [])))))
 
 (play-method metro (take 14 plain-hunt) (minor-notes :C4))
 (play-method metro plain-bob (minor-notes :C4))
