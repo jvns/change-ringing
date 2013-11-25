@@ -1,6 +1,55 @@
-(ns change-ringing.core)
+(ns change-ringing.core
+  (require
+   [overtone.live :refer :all]
+   [overtone.inst.sampled-piano :refer :all]))
 
-(defn foo
-  "I don't do a whole lot."
-  [x]
-  (println x "Hello, World!"))
+
+(sampled-piano (note :C4))
+
+(defn minor-notes [base-note]
+  (let [offsets [0 2 2 1 2 2]]
+    (->> offsets
+         (reductions +)
+         (map #(- (note base-note) %)))))
+
+(def metro (metronome 240))
+(defn play-sequence
+  ([metro notes] (play-sequence metro (metro) notes))
+  ([metro beat notes]
+  (let [intervals (->> beat
+                       (iterate #(+ 1 %))
+                       (map metro))]
+    (doseq [[note time] (map vector notes intervals)]
+      (at time (sampled-piano note))))))
+
+
+  (defn permute [notes perm]
+    (->> perm
+         (map #(- % 1))
+         ( map #(nth notes %))))
+
+(def identity [1 2 3 4 5 6])
+(def handstroke-hunt [2 1 4 3 6 5])
+(def backstroke-hunt [1 3 2 5 4 6])
+(def seconds [1 2 4 3 6 5])
+
+(defmacro defmethod [name sequence]
+  `(def ~name (concat [identity identity] ~sequence)))
+
+(defmethod plain-hunt (cycle [handstroke-hunt backstroke-hunt]))
+
+
+(play-sequence metro (minor-notes :C4))
+
+(defn play-method [metro beat method notes]
+  (let
+      [hs-change (first method)
+       bs-change (second method)
+       hs-notes (permute notes hs-change)
+       bs-notes (permute hs-notes bs-change)]
+    (println "Hi!")
+    (play-sequence metro beat (concat hs-notes bs-notes))
+    (apply-at (metro (+ beat 13)) play-method metro (+ beat 13) (drop 2 method) bs-notes [])))
+
+(play-method metro (metro) (take 14 plain-hunt) (minor-notes :C4))
+(stop)
