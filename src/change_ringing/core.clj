@@ -1,16 +1,11 @@
 (ns change-ringing.core
   (require
    [overtone.live :refer :all]
-   [overtone.inst.sampled-piano :refer :all]))
+  ;; [overtone.inst.sampled-piano :refer :all]
+   [change-ringing.methods :refer :all]))
 
 
 (sampled-piano (note :C4))
-
-(defn minor-notes [base-note]
-  (let [offsets [0 2 2 1 2 2]]
-    (->> offsets
-         (reductions +)
-         (map #(- (note base-note) %)))))
 
 (def metro (metronome 240))
 (defn play-sequence
@@ -23,31 +18,6 @@
       (at time (sampled-piano note))))))
 
 
-  (defn permute [notes perm]
-    (->> perm
-         (map #(- % 1))
-         ( map #(nth notes %))))
-
-(def identity [1 2 3 4 5 6])
-(def handstroke-hunt [2 1 4 3 6 5])
-(def backstroke-hunt [1 3 2 5 4 6])
-(def seconds [1 2 4 3 6 5])
-
-(defmacro defmethod [name sequence]
-  `(def ~name (->> ~sequence
-                   (concat [identity identity])
-                   (reductions permute))))
-
-(defmethod plain-hunt
-  (->> [handstroke-hunt backstroke-hunt]
-       (cycle)
-       (take 12)))
-
-(defmethod plain-bob
-  (->> (concat (take 11 (cycle [handstroke-hunt backstroke-hunt]))
-               [seconds])
-       (cycle)
-       (take 60)))
 
 (defn play-method
   ([metro method notes] (play-method metro (metro) method notes))
