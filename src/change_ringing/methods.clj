@@ -1,12 +1,10 @@
-(ns change-ringing.methods
-  (require
-   [overtone.music.pitch :refer [note]]))
+(ns change-ringing.methods)
 
 (defn minor-notes [base-note]
   (let [offsets [0 2 2 1 2 2]]
     (->> offsets
          (reductions +)
-         (map #(- (note base-note) %)))))
+         (map #(- base-note %)))))
 
 (def identity [1 2 3 4 5 6])
 (def handstroke-hunt [2 1 4 3 6 5])
